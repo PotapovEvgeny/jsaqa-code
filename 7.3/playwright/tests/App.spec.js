@@ -1,22 +1,28 @@
-const { test, expect } = require("@playwright/test");
+const { test, expect, chromium, firefox, webkit } = require("@playwright/test");
+const { email, password } = require('../user');
 
-test("test", async ({ page }) => {
-  // Go to https://netology.ru/free/management#/
-  await page.goto("https://netology.ru/free/management#/");
 
-  // Click a
-  await page.click("a");
-  await expect(page).toHaveURL("https://netology.ru/");
+test('Successful authorization', async ({ page }) => {
+  await page.goto('https://netology.ru/?modal=sign_in');
+  await page.waitForSelector('[placeholder="Email"]');
+  await page.waitForSelector('[placeholder="Пароль"]');
+  await page.fill('[placeholder="Email"]', email);
+  await page.fill('[placeholder="Пароль"]', password);
+  await page.click('[data-testid="login-submit-btn"]');
+  await page.waitForSelector('h2');
+  await expect(page.locator('h2')).toContainText('Моё обучение');
+  await page.screenshot({ path: 'screenshotSuccessful.png', fullPage: true });
+});
 
-  // Click text=Учиться бесплатно
-  await page.click("text=Учиться бесплатно");
-  await expect(page).toHaveURL("https://netology.ru/free");
-
-  page.click("text=Бизнес и управление");
-
-  // Click text=Как перенести своё дело в онлайн
-  await page.click("text=Как перенести своё дело в онлайн");
-  await expect(page).toHaveURL(
-    "https://netology.ru/programs/kak-perenesti-svoyo-delo-v-onlajn-bp"
-  );
+test('Failed authorization', async ({ page }) => {
+  await page.goto('https://netology.ru/?modal=sign_in');
+  await page.waitForSelector('[placeholder="Email"]');
+  await page.waitForSelector('[placeholder="Пароль"]');
+  await page.fill('[placeholder="Email"]', 'incorrectEmail@yandex.ru');
+  await page.fill('[placeholder="Пароль"]', 'incorrectPassport');
+  await page.click('[data-testid="login-submit-btn"]');
+  await page.waitForSelector('[data-testid="login-error-hint"]');
+  const errorMessage = await page.locator('[data-testid="login-error-hint"]').innerText();
+  expect(errorMessage).toContain('Вы ввели неправильно логин или пароль');
+  await page.screenshot({ path: 'screenshotFailed.png', fullPage: true });
 });

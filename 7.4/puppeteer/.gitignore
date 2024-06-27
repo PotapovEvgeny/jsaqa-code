@@ -1,5 +1,7 @@
 /node_modules/
+user.js
 /playwright-report/
+/coverage/
 
 
 .vscode/*
@@ -14,4 +16,3 @@
 /test-results/
 /playwright-report/
 /playwright/.cache/
-/screenshot/
